@@ -1,13 +1,7 @@
-package com.vise.basebluetooth.utils;
+package com.vise.basebluetooth;
 
-/**
- * @Description: Log工具，类似android.util.Log。
- * tag自动产生，格式: TAG:className.methodName(Line:lineNumber),
- * customTagPrefix为空时只输出：className.methodName(Line:lineNumber)。
- * @author: <a href="http://www.xiaoyaoyou1212.com">DAWI</a>
- * @date: 16/8/5 20:43.
- */
-public class BleLog {
+public class Log {
+
     protected static final String TAG = "wangyaohui";
     private final static int LOG_LEVEL_VERBOSE = 0;
     private final static int LOG_LEVEL_DEBUG = 1;
@@ -174,7 +168,7 @@ public class BleLog {
         StackTraceElement caller = new Throwable().fillInStackTrace().getStackTrace()[2];
 
         return new StringBuilder().append(caller.getClassName()).append(".").append(
-                caller.getMethodName()).append("():line ").append(caller.getLineNumber()).append(" ").append(msg).toString();
+                caller.getMethodName()).append("():")/*.append(caller.getLineNumber()).append(" ")*/.append(msg).toString();
     }
 
     public static StackTraceElement getCallerStackTraceElement() {

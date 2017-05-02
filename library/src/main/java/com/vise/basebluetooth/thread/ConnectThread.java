@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
 import com.vise.basebluetooth.BluetoothChatHelper;
+import com.vise.basebluetooth.Log;
 import com.vise.basebluetooth.common.ChatConstant;
 import com.vise.basebluetooth.utils.BleLog;
 
@@ -19,29 +20,22 @@ public class ConnectThread extends Thread {
     private BluetoothChatHelper mHelper;
     private final BluetoothSocket mSocket;
     private final BluetoothDevice mDevice;
-    private String mSocketType;
 
-    public ConnectThread(BluetoothChatHelper bluetoothChatHelper, BluetoothDevice device, boolean secure) {
+    public ConnectThread(BluetoothChatHelper bluetoothChatHelper/*, BluetoothDevice device*/) {
         mHelper = bluetoothChatHelper;
-        mDevice = device;
+        mDevice = mHelper.getDevice();
         BluetoothSocket tmp = null;
-        mSocketType = secure ? "Secure" : "Insecure";
-
         try {
-            if (secure) {
-                tmp = device.createRfcommSocketToServiceRecord(ChatConstant.UUID_SECURE);
-            } else {
-                tmp = device.createInsecureRfcommSocketToServiceRecord(ChatConstant.UUID_INSECURE);
-            }
+            tmp = mDevice.createRfcommSocketToServiceRecord(ChatConstant.UUID_SECURE);
         } catch (IOException e) {
-            BleLog.e("Socket Type: " + mSocketType + "create() failed", e);
+            BleLog.e("Socket create() failed", e);
         }
         mSocket = tmp;
     }
 
     public void run() {
-        BleLog.i("BEGIN mConnectThread SocketType:" + mSocketType);
-        setName("ConnectThread" + mSocketType);
+        Log.e("BEGIN mConnectThread:");
+        setName("ConnectThread");
 
         mHelper.getAdapter().cancelDiscovery();
 
@@ -51,25 +45,30 @@ public class ConnectThread extends Thread {
             try {
                 mSocket.close();
             } catch (IOException e2) {
-                BleLog.e("unable to close() " + mSocketType + " socket during connection failure", e2);
+                BleLog.e("unable to close() socket during connection failure", e2);
+            }
+            try {
+                Thread.sleep(5000);
+            }catch (Exception e3){
             }
             mHelper.connectionFailed();
+
             return;
         }
+        Log.e("connect to server success!");
 
         synchronized (this) {
             mHelper.setConnectThread(null);
         }
 
-        mHelper.connected(mSocket, mDevice, mSocketType);
+        mHelper.connected(mSocket, mDevice);
     }
 
     public void cancel() {
         try {
             mSocket.close();
         } catch (IOException e) {
-            BleLog.e("close() of connect " + mSocketType
-                    + " socket failed", e);
+            BleLog.e("close() of connect socket failed", e);
         }
     }
 }

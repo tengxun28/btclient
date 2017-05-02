@@ -22,8 +22,8 @@ public class ConnectedThread extends Thread {
     private final InputStream mInStream;
     private final OutputStream mOutStream;
 
-    public ConnectedThread(BluetoothChatHelper bluetoothChatHelper, BluetoothSocket socket, String socketType) {
-        BleLog.i("create ConnectedThread: " + socketType);
+    public ConnectedThread(BluetoothChatHelper bluetoothChatHelper, BluetoothSocket socket) {
+        BleLog.i("create ConnectedThread" );
         mHelper = bluetoothChatHelper;
         mSocket = socket;
         InputStream tmpIn = null;
@@ -54,7 +54,9 @@ public class ConnectedThread extends Thread {
                 mHelper.getHandler().obtainMessage(ChatConstant.MESSAGE_READ, bytes, -1, data).sendToTarget();
             } catch (IOException e) {
                 BleLog.e("disconnected", e);
-                mHelper.start(false);
+                if(!exitFlag) {
+                    mHelper.start();
+                }
                 break;
             }
         }
@@ -78,4 +80,10 @@ public class ConnectedThread extends Thread {
             BleLog.e("close() of connect socket failed", e);
         }
     }
+
+    private boolean exitFlag = false;
+    public void setExitFlag(boolean flag) {
+        this.exitFlag = flag;
+    }
+    public boolean getExitFlag() {return exitFlag;}
 }

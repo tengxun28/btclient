@@ -2,7 +2,6 @@ package com.vise.bluetoothchat.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -23,11 +22,8 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
-import com.vise.basebluetooth.BluetoothChatHelper;
-import com.vise.basebluetooth.callback.IChatCallback;
-import com.vise.basebluetooth.common.State;
-import com.vise.basebluetooth.mode.BaseMessage;
 import com.vise.basebluetooth.utils.BluetoothUtil;
+import com.vise.bluetoothchat.Log;
 import com.vise.bluetoothchat.R;
 import com.vise.bluetoothchat.adapter.GroupFriendAdapter;
 import com.vise.bluetoothchat.common.AppConstant;
@@ -35,7 +31,6 @@ import com.vise.bluetoothchat.mode.FriendInfo;
 import com.vise.bluetoothchat.mode.GroupInfo;
 import com.vise.common_base.manager.AppManager;
 import com.vise.common_base.utils.ToastUtil;
-import com.vise.common_utils.log.LogUtils;
 import com.vise.common_utils.utils.character.DateTime;
 import com.vise.common_utils.utils.view.ActivityUtil;
 
@@ -55,6 +50,7 @@ public class MainActivity extends BaseChatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.e("onCreate!");
     }
 
     @Override
@@ -87,9 +83,11 @@ public class MainActivity extends BaseChatActivity
         mGroupFriendAdapter = new GroupFriendAdapter(mContext, mGroupFriendListData);
         mGroupFriendLv.setAdapter(mGroupFriendAdapter);
         mGroupFriendLv.expandGroup(0);
-
         if(BluetoothUtil.isSupportBle(mContext)){
             BluetoothUtil.enableBluetooth((Activity) mContext, 1);
+           /* BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+            adapter.enable();
+            findDevice();*/
         } else{
             ToastUtil.showToast(mContext, getString(R.string.phone_not_support_bluetooth));
             new Handler().postDelayed(new Runnable() {
@@ -99,6 +97,7 @@ public class MainActivity extends BaseChatActivity
                 }
             }, 3000);
         }
+
     }
 
     @Override
@@ -117,6 +116,7 @@ public class MainActivity extends BaseChatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.e("onActivityResult");
         if(requestCode == 1){
             if(resultCode == RESULT_OK){
                 findDevice();
@@ -129,6 +129,7 @@ public class MainActivity extends BaseChatActivity
 
     @Override
     protected void onRestart() {
+        Log.e("onRestart");
         if(BluetoothUtil.isSupportBle(mContext)){
             BluetoothUtil.enableBluetooth((Activity) mContext, 1);
         } else{
@@ -145,6 +146,7 @@ public class MainActivity extends BaseChatActivity
 
     @Override
     public void onBackPressed() {
+        Log.e("onBackPressed");
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -228,6 +230,7 @@ public class MainActivity extends BaseChatActivity
 
     private void findDevice(){
         // 获得已经保存的配对设备
+        Log.e("findDevice");
         Set<BluetoothDevice> pairedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
         if (pairedDevices.size() > 0) {
             mGroupFriendListData.clear();
@@ -251,4 +254,34 @@ public class MainActivity extends BaseChatActivity
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.e("onstart");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e("onResume");
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("onPause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.e("onStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.e("onDestroy");
+    }
 }

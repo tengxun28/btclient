@@ -20,17 +20,12 @@ public class AcceptThread extends Thread {
     private final BluetoothServerSocket mServerSocket;
     private String mSocketType;
 
-    public AcceptThread(BluetoothChatHelper bluetoothChatHelper, boolean secure) {
+    public AcceptThread(BluetoothChatHelper bluetoothChatHelper) {
         mHelper = bluetoothChatHelper;
         BluetoothServerSocket tmp = null;
-        mSocketType = secure ? "Secure" : "Insecure";
 
         try {
-            if (secure) {
-                tmp = mHelper.getAdapter().listenUsingRfcommWithServiceRecord(ChatConstant.NAME_SECURE, ChatConstant.UUID_SECURE);
-            } else {
-                tmp = mHelper.getAdapter().listenUsingInsecureRfcommWithServiceRecord(ChatConstant.NAME_INSECURE, ChatConstant.UUID_INSECURE);
-            }
+            tmp = mHelper.getAdapter().listenUsingRfcommWithServiceRecord(ChatConstant.NAME_SECURE, ChatConstant.UUID_SECURE);
         } catch (IOException e) {
             BleLog.e("Socket Type: " + mSocketType + "listen() failed", e);
         }
@@ -56,7 +51,7 @@ public class AcceptThread extends Thread {
                     if(mHelper.getState() == com.vise.basebluetooth.common.State.STATE_LISTEN
                             || mHelper.getState() == com.vise.basebluetooth.common.State.STATE_CONNECTING){
                         BleLog.i("mark CONNECTING");
-                        mHelper.connected(socket, socket.getRemoteDevice(), mSocketType);
+                        mHelper.connected(socket, socket.getRemoteDevice());
                     } else if(mHelper.getState() == com.vise.basebluetooth.common.State.STATE_NONE
                             || mHelper.getState() == com.vise.basebluetooth.common.State.STATE_CONNECTED){
                         try {

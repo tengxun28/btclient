@@ -48,6 +48,12 @@ public abstract class BaseChatActivity extends BaseActivity implements AppCompat
         initEvent();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AppManager.getAppManager().removeActivity(this);
+    }
+
     protected abstract void initWidget();
     protected abstract void initData();
     protected abstract void initEvent();

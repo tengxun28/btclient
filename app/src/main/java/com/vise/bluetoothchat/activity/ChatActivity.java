@@ -27,7 +27,7 @@ import com.vise.basebluetooth.common.ChatConstant;
 import com.vise.basebluetooth.common.State;
 import com.vise.basebluetooth.mode.BaseMessage;
 import com.vise.basebluetooth.mode.FileMessage;
-import com.vise.basebluetooth.utils.HexUtil;
+import com.vise.bluetoothchat.Log;
 import com.vise.bluetoothchat.R;
 import com.vise.bluetoothchat.adapter.ChatAdapter;
 import com.vise.bluetoothchat.common.AppConstant;
@@ -91,7 +91,10 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
                 LogUtils.e("writeData is Null or Empty!");
                 return;
             }
-            LogUtils.i("writeData:"+HexUtil.encodeHexStr(data));
+            try {
+                BaseMessage message = CommandHelper.unpackData(data);
+                Log.e("write:" + message);
+            } catch (Exception e) {}
         }
 
         @Override
@@ -100,9 +103,10 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
                 LogUtils.e("readData is Null or Empty!");
                 return;
             }
-            LogUtils.i("readData:"+HexUtil.encodeHexStr(data));
+
             try {
                 BaseMessage message = CommandHelper.unpackData(data);
+                LogUtils.i("readData:"+ message);
                 ChatInfo chatInfo = new ChatInfo();
                 chatInfo.setMessage(message);
                 chatInfo.setReceiveTime(DateTime.getStringByFormat(new Date(), DateTime.DEFYMDHMS));
@@ -126,9 +130,9 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
                 return;
             }
             LogUtils.i("showMessage:"+message);
-            if (mProgressDialog != null) {
-                mProgressDialog.hide();
-            }
+//            if (mProgressDialog != null) {
+//                mProgressDialog.hide();
+//            }
             ToastUtil.showToast(mContext, getString(R.string.connect_friend_fail));
         }
     };
@@ -137,6 +141,7 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_chat);
+        Log.e("onCreate");
     }
 
     @Override
@@ -150,7 +155,7 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
         mMsgEditEt = (EditText) findViewById(R.id.chat_msg_edit);
         mMsgSendIb = (ImageButton) findViewById(R.id.chat_msg_send);
         mEmojiconFl = (FrameLayout) findViewById(R.id.chat_emojicons);
-        mProgressDialog = new ProgressDialog(mContext);
+//        mProgressDialog = new ProgressDialog(mContext);
     }
 
     @Override
@@ -167,17 +172,18 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
         mChatAdapter = new ChatAdapter(mContext);
         mChatMsgLv.setAdapter(mChatAdapter);
 
-        mBluetoothChatHelper = new BluetoothChatHelper(chatCallback);
-        mProgressDialog.setMessage(getString(R.string.connect_friend_loading));
-        if(!isFinishing() && !mProgressDialog.isShowing()){
-            mProgressDialog.show();
-        }
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mBluetoothChatHelper.connect(mFriendInfo.getBluetoothDevice(), false);
-            }
-        }, 3000);
+        mBluetoothChatHelper = new BluetoothChatHelper(mFriendInfo.getBluetoothDevice(),chatCallback);
+        Log.e("mBluetoothChatHelper:" + mBluetoothChatHelper);
+//        mProgressDialog.setMessage(getString(R.string.connect_friend_loading));
+//        if(!isFinishing() && !mProgressDialog.isShowing()){
+//            mProgressDialog.show();
+//        }
+//        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                mBluetoothChatHelper.connect(mFriendInfo.getBluetoothDevice(), false);
+//            }
+//        }, 3000);
     }
 
     @Override
@@ -236,14 +242,27 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        Log.e("onStart");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.e("onRestart");
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+        Log.e("onResume");
         if (mBluetoothChatHelper != null) {
             // Only if the state is STATE_NONE, do we know that we haven't
             // started already
             if (mBluetoothChatHelper.getState() == State.STATE_NONE) {
                 // Start the Bluetooth chat services
-                mBluetoothChatHelper.start(false);
+                mBluetoothChatHelper.start();
             }
         }
     }
@@ -302,15 +321,30 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
     }
 
     @Override
-    protected void onDestroy() {
-        if(mProgressDialog != null){
+    protected void onPause() {
+        super.onPause();
+        Log.e("onPause");
+        /*if(mProgressDialog != null){
             mProgressDialog.dismiss();
             mProgressDialog = null;
-        }
+        }*/
+        Log.e("mBluetoothChatHelper:" + mBluetoothChatHelper);
         if(mBluetoothChatHelper != null){
             mBluetoothChatHelper.stop();
             mBluetoothChatHelper = null;
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.e("onStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.e("onDestroy");
+
         super.onDestroy();
     }
 
