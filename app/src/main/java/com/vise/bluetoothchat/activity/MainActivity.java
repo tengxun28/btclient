@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -23,6 +26,7 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.vise.basebluetooth.utils.BluetoothUtil;
+import com.vise.bluetoothchat.ClsUtils;
 import com.vise.bluetoothchat.Log;
 import com.vise.bluetoothchat.R;
 import com.vise.bluetoothchat.adapter.GroupFriendAdapter;
@@ -265,12 +269,15 @@ public class MainActivity extends BaseChatActivity
         super.onResume();
         Log.e("onResume");
 
+        BluetoothAdapter.getDefaultAdapter().startDiscovery();
+        listen();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Log.e("onPause");
+        unListen();
     }
 
     @Override
@@ -284,4 +291,78 @@ public class MainActivity extends BaseChatActivity
         super.onDestroy();
         Log.e("onDestroy");
     }
+
+
+    public void listen() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        intentFilter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(mReceiver, intentFilter);
+        BluetoothAdapter.getDefaultAdapter().startDiscovery();
+    }
+
+    public void unListen() {
+        unregisterReceiver(mReceiver);
+    }
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            Log.e(action);
+            switch (action) {
+                case BluetoothDevice.ACTION_FOUND:
+                    Log.e(device.getName() + "," + device.getAddress() + "," + device.getClass()+ ","  + device.getBluetoothClass() + "," + device.getBondState() + "," + device.getType() + "," + device.getUuids());
+                    if(device.getName().equals("wangyaohui") || device.getAddress().equals("00:18:12:F0:7E:AD")) {
+                        BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+                        int connectState = device.getBondState();
+                        switch (connectState) {
+                            // 未配对
+                            case BluetoothDevice.BOND_NONE:
+                                // 配对
+                                try {
+//                                    Method createBondMethod = BluetoothDevice.class.getMethod("createBond");
+//                                    createBondMethod.invoke(device);
+
+                                    ClsUtils.createBond(device.getClass(), device);
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                break;
+                            // 已配对
+                            case BluetoothDevice.BOND_BONDED:
+                                /*try {
+                                    // 连接
+                                    connect(device);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }*/
+                                break;
+
+                        }
+                    }
+                    break;
+                case "android.bluetooth.device.action.PAIRING_REQUEST":
+                    try {
+
+                        //1.确认配对
+//                        ClsUtils.setPairingConfirmation(device.getClass(), device, true);
+//                        //2.终止有序广播
+//                        Log.i("order..."+ " isOrderedBroadcast:"+isOrderedBroadcast()+",isInitialStickyBroadcast:"+isInitialStickyBroadcast());
+//                        abortBroadcast();//如果没有将广播终止，则会出现一个一闪而过的配对框。
+//                        //3.调用setPin方法进行配对...
+//                        boolean ret = ClsUtils.setPin(device.getClass(), device, "1234");
+
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    break;
+            }
+        }
+    };
 }
