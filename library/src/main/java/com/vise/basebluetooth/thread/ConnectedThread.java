@@ -56,6 +56,7 @@ public class ConnectedThread extends Thread {
                 BleLog.e("disconnected", e);
                 if(!exitFlag) {
                     mHelper.start();
+                } else {
                 }
                 break;
             }

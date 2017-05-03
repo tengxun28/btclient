@@ -12,6 +12,7 @@
 
     <string name="device_online">在线</string>
     <string name="device_offline">离线</string>
+    <string name="device_connecting">连线中...</string>
     <string name="device_unknown">Unknown</string>
 
     <string name="add_friend">添加好友</string>

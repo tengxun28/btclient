@@ -82,6 +82,15 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
                     mTitleTv.setText(mFriendInfo.getFriendNickName()+"("+getString(R.string.device_online)+")");
                 }
                 ToastUtil.showToast(mContext, getString(R.string.connect_friend_success));
+            } else if(state == State.STATE_CONNECTING){
+                if(mFriendInfo != null){
+                    mTitleTv.setText(mFriendInfo.getFriendNickName()+"("+getString(R.string.device_connecting)+")");
+                }
+            }
+            else if(state == State.STATE_NONE){
+                if(mFriendInfo != null){
+                    mTitleTv.setText(mFriendInfo.getFriendNickName()+"("+getString(R.string.device_offline)+")");
+                }
             }
         }
 

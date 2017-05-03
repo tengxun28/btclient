@@ -133,7 +133,7 @@ public class BluetoothChatHelper {
             mAcceptThread = null;
         }
 
-        setState(State.STATE_LISTEN);
+
 
         /*if (mAcceptThread == null) {
             BleLog.d("mSecureAcceptThread start");
@@ -143,6 +143,7 @@ public class BluetoothChatHelper {
         if(mConnectThread == null) {
             mConnectThread = new ConnectThread(this);
             mConnectThread.start();
+            setState(State.STATE_CONNECTING);
         }
     }
 
@@ -188,7 +189,7 @@ public class BluetoothChatHelper {
         mConnectedThread.start();
 
 
-        mHandler.obtainMessage(ChatConstant.MESSAGE_DEVICE_NAME, -1, -1, device.getName()).sendToTarget();
+        mHandler.obtainMessage(ChatConstant.MESSAGE_DEVICE_NAME, -1, -1, device.getName() + "(" + device.getAddress() + ")").sendToTarget();
         setState(State.STATE_CONNECTED);
     }
 
@@ -228,11 +229,13 @@ public class BluetoothChatHelper {
 
     public void connectionFailed() {
         mHandler.obtainMessage(ChatConstant.MESSAGE_TOAST, -1, -1, "Unable to connect device").sendToTarget();
+        setState(State.STATE_NONE);
         this.start();
     }
 
     public void connectionLost() {
         mHandler.obtainMessage(ChatConstant.MESSAGE_TOAST, -1, -1, "Device connection was lost").sendToTarget();
+        setState(State.STATE_NONE);
         this.start();
     }
 

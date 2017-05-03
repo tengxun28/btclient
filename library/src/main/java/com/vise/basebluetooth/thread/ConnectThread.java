@@ -34,8 +34,8 @@ public class ConnectThread extends Thread {
     }
 
     public void run() {
-        Log.e("BEGIN mConnectThread:");
-        setName("ConnectThread");
+        Log.e("ConnectThread begin:" + getId());
+        setName("ConnectThread" + getId());
 
         mHelper.getAdapter().cancelDiscovery();
 
