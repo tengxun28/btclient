@@ -26,7 +26,6 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.vise.basebluetooth.utils.BluetoothUtil;
-import com.vise.bluetoothchat.ClsUtils;
 import com.vise.bluetoothchat.Log;
 import com.vise.bluetoothchat.R;
 import com.vise.bluetoothchat.adapter.GroupFriendAdapter;
@@ -49,6 +48,7 @@ public class MainActivity extends BaseChatActivity
     private ExpandableListView mGroupFriendLv;
     private GroupFriendAdapter mGroupFriendAdapter;
     private List<GroupInfo> mGroupFriendListData = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,12 +87,12 @@ public class MainActivity extends BaseChatActivity
         mGroupFriendAdapter = new GroupFriendAdapter(mContext, mGroupFriendListData);
         mGroupFriendLv.setAdapter(mGroupFriendAdapter);
         mGroupFriendLv.expandGroup(0);
-        if(BluetoothUtil.isSupportBle(mContext)){
+        if (BluetoothUtil.isSupportBle(mContext)) {
             BluetoothUtil.enableBluetooth((Activity) mContext, 1);
            /* BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
             adapter.enable();
-            findDevice();*/
-        } else{
+            findPariedDevice();*/
+        } else {
             ToastUtil.showToast(mContext, getString(R.string.phone_not_support_bluetooth));
             new Handler().postDelayed(new Runnable() {
                 @Override
@@ -121,10 +121,10 @@ public class MainActivity extends BaseChatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.e("onActivityResult");
-        if(requestCode == 1){
-            if(resultCode == RESULT_OK){
-                findDevice();
-            } else{
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                findPariedDevice();
+            } else {
                 AppManager.getAppManager().appExit(mContext);
             }
         }
@@ -134,9 +134,9 @@ public class MainActivity extends BaseChatActivity
     @Override
     protected void onRestart() {
         Log.e("onRestart");
-        if(BluetoothUtil.isSupportBle(mContext)){
+        if (BluetoothUtil.isSupportBle(mContext)) {
             BluetoothUtil.enableBluetooth((Activity) mContext, 1);
-        } else{
+        } else {
             ToastUtil.showToast(mContext, getString(R.string.phone_not_support_bluetooth));
             new Handler().postDelayed(new Runnable() {
                 @Override
@@ -177,7 +177,7 @@ public class MainActivity extends BaseChatActivity
         if (id == R.id.menu_about) {
             displayAboutDialog();
             return true;
-        } else if(id == R.id.menu_share){
+        } else if (id == R.id.menu_share) {
             ToastUtil.showToast(mContext, getString(R.string.menu_share));
             return true;
         }
@@ -232,9 +232,9 @@ public class MainActivity extends BaseChatActivity
                 .show();
     }
 
-    private void findDevice(){
+    private void findPariedDevice() {
         // 获得已经保存的配对设备
-        Log.e("findDevice");
+        Log.e("findPariedDevice");
         Set<BluetoothDevice> pairedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
         if (pairedDevices.size() > 0) {
             mGroupFriendListData.clear();
@@ -269,7 +269,7 @@ public class MainActivity extends BaseChatActivity
         super.onResume();
         Log.e("onResume");
 
-        BluetoothAdapter.getDefaultAdapter().startDiscovery();
+//        BluetoothAdapter.getDefaultAdapter().startDiscovery();
         listen();
     }
 
@@ -292,77 +292,25 @@ public class MainActivity extends BaseChatActivity
         Log.e("onDestroy");
     }
 
-
-    public void listen() {
+    void listen() {
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(mReceiver, intentFilter);
-        BluetoothAdapter.getDefaultAdapter().startDiscovery();
+        intentFilter.addAction("android.intent.action.pairing_device");
+        this.registerReceiver(mReceiver, intentFilter);
     }
 
-    public void unListen() {
-        unregisterReceiver(mReceiver);
+    void unListen() {
+        this.unregisterReceiver(mReceiver);
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             Log.e(action);
-            switch (action) {
-                case BluetoothDevice.ACTION_FOUND:
-                    Log.e(device.getName() + "," + device.getAddress() + "," + device.getClass()+ ","  + device.getBluetoothClass() + "," + device.getBondState() + "," + device.getType() + "," + device.getUuids());
-                    if(device.getName().equals("wangyaohui") || device.getAddress().equals("00:18:12:F0:7E:AD")) {
-                        BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
-                        int connectState = device.getBondState();
-                        switch (connectState) {
-                            // 未配对
-                            case BluetoothDevice.BOND_NONE:
-                                // 配对
-                                try {
-//                                    Method createBondMethod = BluetoothDevice.class.getMethod("createBond");
-//                                    createBondMethod.invoke(device);
-
-                                    ClsUtils.createBond(device.getClass(), device);
-
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                break;
-                            // 已配对
-                            case BluetoothDevice.BOND_BONDED:
-                                /*try {
-                                    // 连接
-                                    connect(device);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }*/
-                                break;
-
-                        }
-                    }
-                    break;
-                case "android.bluetooth.device.action.PAIRING_REQUEST":
-                    try {
-
-                        //1.确认配对
-//                        ClsUtils.setPairingConfirmation(device.getClass(), device, true);
-//                        //2.终止有序广播
-//                        Log.i("order..."+ " isOrderedBroadcast:"+isOrderedBroadcast()+",isInitialStickyBroadcast:"+isInitialStickyBroadcast());
-//                        abortBroadcast();//如果没有将广播终止，则会出现一个一闪而过的配对框。
-//                        //3.调用setPin方法进行配对...
-//                        boolean ret = ClsUtils.setPin(device.getClass(), device, "1234");
-
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    break;
+            if ("android.intent.action.pairing_device".equals(action)) {
+                findPariedDevice();
             }
         }
     };
+
 }

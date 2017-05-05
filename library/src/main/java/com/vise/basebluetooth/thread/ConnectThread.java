@@ -9,6 +9,7 @@ import com.vise.basebluetooth.common.ChatConstant;
 import com.vise.basebluetooth.utils.BleLog;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 /**
  * @Description: 连接线程
@@ -34,7 +35,17 @@ public class ConnectThread extends Thread {
     }
 
     public void run() {
-        Log.e("ConnectThread begin:" + getId());
+        Log.e("ConnectThread begin:" + getId() + "," + mDevice.getBondState());
+        if(mDevice.getBondState() == BluetoothDevice.BOND_NONE) {
+            try {
+                Method createBondMethod = BluetoothDevice.class.getMethod("createBond");
+                createBondMethod.invoke(mDevice);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
         setName("ConnectThread" + getId());
 
         mHelper.getAdapter().cancelDiscovery();

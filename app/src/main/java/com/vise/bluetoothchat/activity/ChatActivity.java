@@ -279,6 +279,9 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
     private void sendMessage() {
         ChatInfo chatInfo = new ChatInfo();
         FriendInfo friendInfo = new FriendInfo();
+
+        if(mBluetoothChatHelper == null) return;
+
         friendInfo.setBluetoothDevice(mBluetoothChatHelper.getAdapter().getRemoteDevice(mBluetoothChatHelper.getAdapter().getAddress()));
         friendInfo.setOnline(true);
         friendInfo.setFriendNickName(mBluetoothChatHelper.getAdapter().getName());
@@ -353,7 +356,6 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
     @Override
     protected void onDestroy() {
         Log.e("onDestroy");
-
         super.onDestroy();
     }
 
