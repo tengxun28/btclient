@@ -158,6 +158,7 @@ public class ChatActivity extends BaseChatActivity implements EmojiconsFragment.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mTitleTv = (TextView) findViewById(R.id.title);
+
         mChatMsgLv = (ListView) findViewById(R.id.chat_msg_show_list);
         mMsgFaceIb = (ImageButton) findViewById(R.id.chat_msg_face);
         mMsgAddIb = (ImageButton) findViewById(R.id.chat_msg_add);

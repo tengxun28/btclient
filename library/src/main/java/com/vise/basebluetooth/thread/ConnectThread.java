@@ -10,6 +10,8 @@ import com.vise.basebluetooth.utils.BleLog;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @Description: 连接线程
@@ -48,6 +50,8 @@ public class ConnectThread extends Thread {
 
         setName("ConnectThread" + getId());
 
+        printAllthreadInfo();
+
         mHelper.getAdapter().cancelDiscovery();
 
         try {
@@ -81,5 +85,28 @@ public class ConnectThread extends Thread {
         } catch (IOException e) {
             BleLog.e("close() of connect socket failed", e);
         }
+    }
+
+    public String pInfo() {
+        return pInfo(Thread.currentThread());
+    }
+
+    public String pInfo(Thread thread) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("(Thread Name:").append(thread.getName()).append(",Id:").append(thread.getId()).append(")");
+        return sb.toString();
+    }
+
+    public void printAllthreadInfo() {
+        StringBuffer sb = new StringBuffer("\n");
+        Thread thread = Thread.currentThread();
+        Map map = Thread.getAllStackTraces(); //也可以map<Thread, StackTraceElement[]>
+        sb.append("当前线程数：" + map.size()).append("\n");
+        Iterator it = map.keySet().iterator();
+        while (it.hasNext()) {
+            Thread t = (Thread) it.next(); //
+            sb.append(pInfo(t)).append("\n");
+        }
+        Log.e(sb.toString());
     }
 }
